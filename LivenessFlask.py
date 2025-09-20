@@ -39,7 +39,7 @@ for folder in [UPLOAD_FOLDER, STATIC_FOLDER]:
         os.makedirs(folder)
 
 # Konfigurasi Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://apifr:askingme@localhost/db_apifr'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:admin123@localhost/db_apiface'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
