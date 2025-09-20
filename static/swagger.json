@@ -1,0 +1,241 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Face Recognition API",
+    "description": "API lengkap untuk registrasi, perbandingan, list, detail, update, dan hapus wajah. Versi ini dioptimalkan dengan menyimpan encoding wajah di database untuk perbandingan yang lebih cepat.",
+    "version": "3.0.0"
+  },
+  "paths": {
+    "/api/register": {
+      "post": {
+        "summary": "Registrasi Wajah Baru & Simpan Encoding",
+        "description": "Mendaftarkan wajah baru berdasarkan ID, Nama, dan Foto. Secara otomatis menghitung dan menyimpan encoding wajah untuk perbandingan cepat di masa depan.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "formData",
+            "description": "ID unik (Integer) untuk pengguna baru.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "Nama lengkap pengguna.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "member_id",
+            "in": "formData",
+            "description": "ID unik (Integer) opsional untuk member terkait.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "photo",
+            "in": "formData",
+            "description": "File foto wajah yang akan didaftarkan.",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Foto berhasil diregistrasi."
+          },
+          "400": {
+            "description": "Input tidak lengkap atau format file/wajah tidak valid."
+          },
+          "409": {
+            "description": "ID sudah terdaftar."
+          },
+          "500": {
+            "description": "Terjadi kesalahan internal."
+          }
+        }
+      }
+    },
+    "/api/compare": {
+      "post": {
+        "summary": "Bandingkan Wajah (Cepat)",
+        "description": "Membandingkan foto baru dengan encoding wajah yang sudah terdaftar di database (tolerance=0.4). Proses ini sangat cepat karena tidak menghitung ulang encoding dari file yang tersimpan.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "formData",
+            "description": "ID pengguna terdaftar yang ingin dijadikan acuan.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "photo",
+            "in": "formData",
+            "description": "File foto wajah baru untuk dibandingkan.",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hasil perbandingan: 'Wajah dikenali' atau 'Wajah tidak cocok'."
+          },
+          "400": {
+            "description": "Input tidak lengkap atau wajah tidak terdeteksi."
+          },
+          "404": {
+            "description": "User tidak ditemukan."
+          },
+          "500": {
+            "description": "Terjadi kesalahan internal."
+          }
+        }
+      }
+    },
+   "/api/compare_direct": {
+      "post": {
+        "summary": "Bandingkan Wajah Langsung (Cari Otomatis)",
+        "description": "Membandingkan foto baru dengan semua wajah di database dan mengembalikan wajah yang paling cocok.",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "photo",
+            "in": "formData",
+            "description": "File foto wajah yang akan dibandingkan.",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hasil perbandingan. Jika cocok, akan dikembalikan data user yang dikenali."
+          },
+          "400": {
+            "description": "Foto tidak valid atau tidak ada wajah yang terdeteksi."
+          },
+          "500": {
+            "description": "Terjadi kesalahan internal."
+          }
+        }
+      }
+    },
+    "/api/faces": {
+      "get": {
+        "summary": "Dapatkan Daftar Semua Wajah",
+        "description": "Mengambil semua data pengguna yang wajahnya sudah terdaftar di sistem. Dapat difilter berdasarkan 'id_member'.",
+        "parameters": [
+          {
+            "name": "id_member",
+            "in": "query",
+            "description": "Filter daftar wajah berdasarkan ID member (opsional).",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berhasil mengambil daftar wajah."
+          }
+        }
+      }
+    },
+    "/api/faces/{face_id}": {
+      "get": {
+        "summary": "Dapatkan Detail Wajah",
+        "description": "Mengambil detail satu pengguna berdasarkan ID.",
+        "parameters": [
+          {
+            "name": "face_id",
+            "in": "path",
+            "description": "ID dari wajah yang akan ditampilkan.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berhasil mendapatkan detail user."
+          },
+          "404": {
+            "description": "User tidak ditemukan."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Nama, Foto, atau ID Member",
+        "description": "Memperbarui data untuk pengguna yang sudah ada. Jika foto diubah, encoding wajah akan dihitung ulang secara otomatis.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "face_id",
+            "in": "path",
+            "description": "ID dari wajah yang akan diupdate.",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "Nama baru untuk pengguna (opsional).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "member_id",
+            "in": "formData",
+            "description": "ID Member baru (opsional).",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "photo",
+            "in": "formData",
+            "description": "File foto wajah baru (opsional).",
+            "required": false,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data berhasil diupdate."
+          },
+          "400": {
+            "description": "Input tidak valid atau tidak ada wajah di foto baru."
+          },
+          "404": {
+            "description": "User tidak ditemukan."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Hapus Wajah",
+        "description": "Menghapus data wajah dan file gambar pengguna dari sistem berdasarkan ID.",
+        "parameters": [
+          {
+            "name": "face_id",
+            "in": "path",
+            "description": "ID dari wajah yang akan dihapus.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wajah berhasil dihapus."
+          },
+          "404": {
+            "description": "Wajah tidak ditemukan."
+          }
+        }
+      }
+    }
+  }
+}

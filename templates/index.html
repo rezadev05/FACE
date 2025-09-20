@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Foto</title>
+</head>
+<body>
+    <h1>Register Foto</h1>
+    <form action="https://apifr.aiproximasuite.com/register" method="post" enctype="multipart/form-data">
+        <input type="text" name="id" placeholder="Masukkan ID" required>
+        <input type="text" name="name" placeholder="Masukkan Nama" required>
+        <input type="file" name="photo" accept="image/*" required>
+        <button type="submit">Register</button>
+    </form>
+
+    <h1>Tes Compare Foto</h1>
+    <form id="compare-form" action="https://apifr.aiproximasuite.com/compare" method="post" enctype="multipart/form-data">
+        <label for="user-select">Pilih User:</label>
+        <select id="user-select" name="user_id" onchange="updateUserPhoto()" required>
+            <option value="">--Pilih User--</option>
+            {% for user in users %}
+                <option value="{{ user.id }}"
+                        data-name="{{ user.nama }}"
+                        data-photo="{{ user.file_path }}">
+                    {{ user.nama }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <div id="user-info" style="display: none;">
+            <p id="user-nama"></p>
+            <div id="user-photo">
+                <img id="photo-display" src="" alt="User Photo" style="max-width: 200px;">
+            </div>
+        </div>
+
+        <input type="file" name="photo" accept="image/*" required>
+        <button type="submit">Tes Compare</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        function updateUserPhoto() {
+            const userSelect = document.getElementById('user-select');
+            const userInfo = document.getElementById('user-info');
+            const userName = document.getElementById('user-nama');
+            const photoDisplay = document.getElementById('photo-display');
+            const selectedUser = userSelect.options[userSelect.selectedIndex];
+
+            if (selectedUser.value) {
+                userName.textContent = `Nama: ${selectedUser.dataset.name}`;
+                photoDisplay.src = `https://apifr.aiproximasuite.com/${selectedUser.dataset.photo}`;
+                userInfo.style.display = 'block';
+            } else {
+                userInfo.style.display = 'none';
+                photoDisplay.src = '';
+            }
+        }
+    </script>
+</body>
+</html>
